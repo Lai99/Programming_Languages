@@ -88,8 +88,66 @@ fun get_nth(str_list : string list, nth : int) =
 			nth_str(tl str_list, n - 1)
 	in
             nth_str(str_list, nth)
-	end
+	end 
 
 (* date_to_string function *)
-fun date_to_string(date : int*int*int) = 
-    
+fun date_to_string(date : int*int*int) =     
+    get_nth(["January","February","March","April","May","June","July","August","September","October","November","December"], (#2 date)) ^ " " ^  Int.toString(#3 date) ^ ", " ^  Int.toString(#1 date)
+
+(* number_before_reaching_sum function *)
+fun number_before_reaching_sum(bound : int, numbers : int list) =    
+    let
+        fun sum(numbers : int list, total) = 
+            if bound <= total
+	    then 0
+	    else
+                if null (tl numbers)
+                then 1
+                else             
+                    1 + sum(tl numbers, total + hd(tl numbers))
+    in
+        sum(numbers, hd numbers)
+    end 
+        
+(* what_month function *)
+fun what_month(day : int) = 
+    number_before_reaching_sum(day, [31,28,31,30,31,30,31,31,30,31,30,31])+1
+
+(* month_range function *)
+fun month_range(day1 : int, day2 : int) =
+    if day1 > day2
+    then []
+    else
+        what_month(day1)::month_range(day1+1,day2)
+            
+(* oldest function *)
+fun oldest(dates : (int*int*int) list) = 
+    if null dates
+    then NONE
+    else
+        let val oldest_day = oldest(tl dates)
+        in 
+            if isSome oldest_day andalso is_older(valOf oldest_day, hd dates)
+            then oldest_day
+            else SOME (hd dates)    
+        end
+
+(* number_in_months_challenges function *)
+fun number_in_months_challenges(dates : (int*int*int) list, months_match : int list) =
+    let
+        fun keep_not_same(m_list : int list, match : int) =
+            if null m_list
+            then []
+            else
+                if match = hd m_list
+                then keep_not_same(tl m_list, match)
+                else hd m_list::keep_not_same(tl m_list, match)
+
+        fun new_match(m_list : int list) =
+            if null m_list
+            then []
+            else
+                hd m_list::new_match(keep_not_same(tl m_list, hd m_list))
+    in
+        number_in_months(dates,new_match(months_match))
+    end
